@@ -1,0 +1,1510 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S STUDIO</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+:root {
+    --header-height: 24px;
+    --cell-width: 50px;
+    --cell-height: 50px;
+    --grid-line-color: #b0b0b0;
+    --inactive-color: #d3d3d3;
+}
+
+/* HEADER */
+#topbar {
+    position: relative;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: var(--header-height);
+    min-height: 20px;
+    padding: 0 12px;
+    background: black;
+}
+
+#brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 7px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .2px;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+#brand:hover {
+    color: red;
+    background: white;
+    box-shadow: -12px 0 white, 12px 0 white;
+}
+
+/* MENU */
+#nav-links {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+#menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 7px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+#menu-button:hover,
+#menu-button[aria-expanded="true"] {
+    background: white;
+    box-shadow: -12px 0 white, 12px 0 white;
+}
+
+.menu-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 15px;
+    height: 12px;
+}
+
+.menu-icon span {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: white;
+}
+
+#menu-button:hover .menu-icon span,
+#menu-button[aria-expanded="true"] .menu-icon span {
+    background: red;
+}
+
+/* DROPDOWN: 1x1 GRID CELL, TOP RIGHT */
+#dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: -12px;
+    z-index: 35;
+
+    display: none;
+    flex-direction: column;
+
+    width: var(--cell-width);
+    height: var(--cell-height);
+    padding-top: 0;
+
+    background: black;
+}
+
+#dropdown-menu.open {
+    display: flex;
+}
+
+.dropdown-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    margin-top: 5px;
+    padding: 0 5px 0 0;
+    line-height: 1;
+    color: white;
+    background: black;
+    font-size: 12px;
+    text-align: right;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.dropdown-link:hover,
+.dropdown-link:focus-visible {
+    color: black;
+    background: white;
+    outline: none;
+}
+
+/* GRID */
+#grid {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - var(--header-height));
+    height: calc(100dvh - var(--header-height));
+    overflow: hidden;
+    touch-action: none;
+
+    background-color: white;
+    background-image:
+        linear-gradient(
+            to right,
+            var(--grid-line-color) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            to bottom,
+            var(--grid-line-color) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        var(--cell-width) var(--cell-height),
+        var(--cell-width) var(--cell-height);
+}
+
+/* PROJECTS */
+.project {
+    position: absolute;
+    z-index: 2;
+    background: black;
+    color: white;
+    user-select: none;
+    transition: background-color .18s ease;
+}
+
+.project-number {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    z-index: 3;
+    color: white;
+    font-size: 11px;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.project-number:hover {
+    color: red;
+}
+
+.project-name {
+    position: absolute;
+    top: 24px;
+    left: 7px;
+    color: white;
+    font-size: 10px;
+    pointer-events: none;
+}
+
+/* HOVER COLORS */
+#grid.project-hover-active .project:not(.is-hovered) {
+    background: var(--inactive-color);
+}
+
+#grid.project-hover-active
+.project:not(.is-hovered) .project-number,
+#grid.project-hover-active
+.project:not(.is-hovered) .project-name {
+    color: black;
+}
+
+#grid.project-hover-active .project.is-hovered {
+    background: black;
+}
+
+/* PREVIEW AREAS */
+#preview-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 12;
+    pointer-events: none;
+}
+
+.preview-panel {
+    position: absolute;
+
+    /* ALWAYS 3x2 CELLS */
+    width: calc(3 * var(--cell-width));
+    height: calc(2 * var(--cell-height));
+
+    background: black;
+    color: white;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.preview-label {
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    z-index: 2;
+    color: white;
+    font-size: 11px;
+    line-height: 1;
+}
+
+.preview-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* SNAKE */
+.snake-segment,
+.snake-head {
+    position: absolute;
+    z-index: 5;
+    background: red;
+    transition: background-color .18s ease;
+}
+
+.snake-head {
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#grid.project-hover-active .snake-segment,
+#grid.project-hover-active .snake-head {
+    background: var(--inactive-color);
+}
+
+.snake-start {
+    padding: 4px 7px;
+    color: white;
+    background: transparent;
+    border: 0;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: .3px;
+    cursor: pointer;
+}
+
+.snake-start:hover,
+#grid.project-hover-active .snake-start {
+    color: black;
+}
+
+/* GAME OVER */
+#game-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.88);
+}
+
+#game-overlay.visible {
+    display: flex;
+}
+
+#game-message {
+    color: black;
+    font-size: 14px;
+    line-height: 1.8;
+    text-align: center;
+}
+
+#game-message h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+#restart-button {
+    margin-top: 12px;
+    padding: 9px 18px;
+    color: white;
+    background: black;
+    border: 0;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+#restart-button:hover {
+    background: red;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    #topbar {
+        padding: 0 8px;
+    }
+
+    #brand {
+        font-size: 11px;
+        padding: 0 5px;
+    }
+
+    #menu-button {
+        padding: 0 5px;
+    }
+
+    #brand:hover {
+        box-shadow: -8px 0 white, 8px 0 white;
+    }
+
+    #menu-button:hover,
+    #menu-button[aria-expanded="true"] {
+        box-shadow: -8px 0 white, 8px 0 white;
+    }
+
+    #dropdown-menu {
+        right: -8px;
+        padding-top: 0;
+    }
+
+    .dropdown-link {
+        min-height: 0;
+        margin-top: 4px;
+        padding: 0 4px 0 0;
+        font-size: 11px;
+    }
+
+    .project-number {
+        top: 5px;
+        left: 5px;
+    }
+
+    .project-name {
+        top: 21px;
+        left: 5px;
+    }
+
+    .preview-label {
+        top: 7px;
+        left: 7px;
+        font-size: 10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header id="topbar">
+    <a href="index.html" id="brand">S STUDIO</a>
+
+    <nav id="nav-links" aria-label="Ana menü">
+        <button
+            id="menu-button"
+            type="button"
+            aria-label="Menüyü aç"
+            aria-expanded="false"
+            aria-controls="dropdown-menu"
+        >
+            <span class="menu-icon">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+        </button>
+
+        <div id="dropdown-menu">
+            <a href="contact.html" class="dropdown-link">
+                contact
+            </a>
+        </div>
+    </nav>
+</header>
+
+<main id="grid">
+    <div id="preview-layer"></div>
+
+    <div id="game-overlay">
+        <div id="game-message">
+            <h2 id="game-result">GAME OVER</h2>
+            <div id="project-count">Projects eaten: 0</div>
+            <button id="restart-button">PLAY AGAIN</button>
+        </div>
+    </div>
+</main>
+
+<script>
+/* ELEMENTS */
+const grid = document.getElementById("grid");
+const previewLayer = document.getElementById("preview-layer");
+const overlay = document.getElementById("game-overlay");
+const gameResult = document.getElementById("game-result");
+const projectCount = document.getElementById("project-count");
+const restartButton = document.getElementById("restart-button");
+
+const brand = document.getElementById("brand");
+const menuButton = document.getElementById("menu-button");
+const dropdownMenu = document.getElementById("dropdown-menu");
+const navLinks = document.getElementById("nav-links");
+
+/* BRAND: RELOAD */
+brand.addEventListener("click", event => {
+    event.preventDefault();
+    window.location.reload();
+});
+
+/* MENU */
+function setMenuOpen(open) {
+    dropdownMenu.classList.toggle("open", open);
+    menuButton.setAttribute("aria-expanded", String(open));
+    menuButton.setAttribute(
+        "aria-label",
+        open ? "Menüyü kapat" : "Menüyü aç"
+    );
+}
+
+menuButton.addEventListener("click", event => {
+    event.stopPropagation();
+    setMenuOpen(!dropdownMenu.classList.contains("open"));
+});
+
+document.addEventListener("click", event => {
+    if (!navLinks.contains(event.target)) {
+        setMenuOpen(false);
+    }
+});
+
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") setMenuOpen(false);
+});
+
+document.querySelectorAll(".dropdown-link").forEach(link => {
+    link.addEventListener("click", () => setMenuOpen(false));
+});
+
+/* GRID VARIABLES */
+let columns = 1;
+let rows = 1;
+let cellWidth = 50;
+let cellHeight = 50;
+
+/* GAME VARIABLES */
+let snake = [];
+let direction = { x: 1, y: 0 };
+let nextDirection = { x: 1, y: 0 };
+let projects = [];
+
+let eatenCount = 0;
+let lastSpawnedProjectId = null;
+let gameRunning = false;
+let gameStarted = false;
+let gameTimer = null;
+let startDelay = null;
+
+const TOTAL_PROJECTS = 10;
+const PROJECTS_TO_REPLACE = 10;
+
+/*
+    NEW RESPONSIVE PREVIEW RULE
+
+    Portrait screen:
+      Width < 768px  -> 1 preview
+      Width >= 768px -> 3 previews
+
+    Landscape screen:
+      Always 3 previews
+
+    Preview dimensions NEVER change.
+*/
+const PORTRAIT_TABLET_BREAKPOINT = 768;
+
+const PREVIEW_COLS = 3;
+const PREVIEW_ROWS = 2;
+const PREVIEW_GAP = 1;
+const SOURCE_GAP = 1;
+const MAX_PREVIEW_COUNT = 3;
+
+function getPreviewCount() {
+    const portrait =
+        window.innerHeight > window.innerWidth;
+
+    if (
+        portrait &&
+        window.innerWidth < PORTRAIT_TABLET_BREAKPOINT
+    ) {
+        return 1;
+    }
+
+    return MAX_PREVIEW_COUNT;
+}
+
+/* PROJECT DATA */
+const projectData = [
+    {
+        id: "01", name: "", url: "project-01.html",
+        images: ["", "", ""]
+    },
+    {
+        id: "02", name: "", url: "project-02.html",
+        images: ["", "", ""]
+    },
+    {
+        id: "03", name: "", url: "project-03.html",
+        images: ["", "", ""]
+    },
+    {
+        id: "04", name: "", url: "project-04.html",
+        images: ["", "", ""]
+    },
+    {
+        id: "05", name: "", url: "project-05.html",
+        images: ["", "", ""]
+    },
+    {
+        id: "06", name: "", url: "project-06.html",
+        images: ["", "", ""]
+    },
+    {
+        id: "07", name: "", url: "project-07.html",
+        images: ["", "", ""]
+    },
+    {
+        id: "08", name: "", url: "project-08.html",
+        images: ["", "", ""]
+    },
+    {
+        id: "09", name: "", url: "project-09.html",
+        images: ["", "", ""]
+    },
+    {
+        id: "10", name: "", url: "project-10.html",
+        images: ["", "", ""]
+    }
+];
+
+/* GRID CALCULATION */
+function calculateGrid() {
+    const width = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const landscape = width >= viewportHeight;
+
+    const minDivisor = landscape ? 4 : 2.5;
+    const maxDivisor = landscape ? 8 : 4;
+    const preferredDivisor = landscape ? 8 : 2.8;
+
+    let bestScore = Infinity;
+    let best = null;
+
+    for (
+        let divisor = minDivisor;
+        divisor <= maxDivisor + 0.001;
+        divisor += 0.1
+    ) {
+        let availableHeight = viewportHeight;
+        let testColumns = 1;
+        let testRows = 1;
+        let testCellWidth = 1;
+        let testCellHeight = 1;
+        let headerHeight = 0;
+
+        for (let iteration = 0; iteration < 4; iteration++) {
+            const baseSize = Math.min(width, availableHeight);
+            const targetSize = baseSize / divisor;
+
+            testColumns = Math.max(
+                1,
+                Math.round(width / targetSize)
+            );
+
+            testRows = Math.max(
+                1,
+                Math.round(availableHeight / targetSize)
+            );
+
+            testCellWidth = width / testColumns;
+            testCellHeight = availableHeight / testRows;
+
+            headerHeight = testCellHeight / 4;
+            availableHeight = viewportHeight - headerHeight;
+        }
+
+        const ratioError = Math.abs(
+            Math.log(testCellWidth / testCellHeight)
+        );
+
+        const sizePenalty =
+            Math.abs(divisor - preferredDivisor) * 0.0005;
+
+        const score = ratioError + sizePenalty;
+
+        if (score < bestScore) {
+            bestScore = score;
+            best = {
+                columns: testColumns,
+                rows: testRows,
+                cellWidth: testCellWidth,
+                cellHeight: testCellHeight,
+                headerHeight
+            };
+        }
+    }
+
+    columns = best.columns;
+    rows = best.rows;
+    cellWidth = width / columns;
+    cellHeight =
+        (viewportHeight - best.headerHeight) / rows;
+
+    document.documentElement.style.setProperty(
+        "--header-height",
+        best.headerHeight + "px"
+    );
+    document.documentElement.style.setProperty(
+        "--cell-width",
+        cellWidth + "px"
+    );
+    document.documentElement.style.setProperty(
+        "--cell-height",
+        cellHeight + "px"
+    );
+
+    setupGame();
+}
+
+/* HELPERS */
+function randomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
+function cellKey(cell) {
+    return cell.x + "," + cell.y;
+}
+
+function isInside(cell) {
+    return (
+        cell.x >= 0 &&
+        cell.x < columns &&
+        cell.y >= 0 &&
+        cell.y < rows
+    );
+}
+
+function getOccupiedCells() {
+    const occupied = new Set();
+
+    snake.forEach(cell => occupied.add(cellKey(cell)));
+    projects.forEach(cell => occupied.add(cellKey(cell)));
+
+    return occupied;
+}
+
+function getFreePosition() {
+    const occupied = getOccupiedCells();
+    const free = [];
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < columns; x++) {
+            const cell = { x, y };
+
+            if (!occupied.has(cellKey(cell))) {
+                free.push(cell);
+            }
+        }
+    }
+
+    return free.length ? free[randomInt(free.length)] : null;
+}
+
+/* RANDOM SNAKE */
+function createRandomSnake() {
+    const shapes = ["horizontal", "vertical", "L"];
+    const shape = shapes[randomInt(shapes.length)];
+
+    for (let attempt = 0; attempt < 300; attempt++) {
+        const head = {
+            x: 2 + randomInt(Math.max(1, columns - 4)),
+            y: 2 + randomInt(Math.max(1, rows - 4))
+        };
+
+        const directions = [
+            { x: 1, y: 0 },
+            { x: -1, y: 0 },
+            { x: 0, y: 1 },
+            { x: 0, y: -1 }
+        ];
+
+        let d = directions[randomInt(directions.length)];
+
+        if (shape === "horizontal") {
+            d = directions[randomInt(2)];
+        } else if (shape === "vertical") {
+            d = directions[2 + randomInt(2)];
+        }
+
+        let body;
+
+        if (shape === "L") {
+            const perpendicular = {
+                x: -d.y,
+                y: d.x
+            };
+
+            body = [
+                head,
+                {
+                    x: head.x - d.x,
+                    y: head.y - d.y
+                },
+                {
+                    x: head.x - d.x - perpendicular.x,
+                    y: head.y - d.y - perpendicular.y
+                }
+            ];
+        } else {
+            body = [
+                head,
+                {
+                    x: head.x - d.x,
+                    y: head.y - d.y
+                },
+                {
+                    x: head.x - 2 * d.x,
+                    y: head.y - 2 * d.y
+                }
+            ];
+        }
+
+        if (
+            body.every(isInside) &&
+            new Set(body.map(cellKey)).size === 3
+        ) {
+            snake = body;
+            direction = { ...d };
+            nextDirection = { ...d };
+            return;
+        }
+    }
+
+    const y = Math.min(1, rows - 1);
+    snake = [
+        { x: Math.min(2, columns - 1), y },
+        { x: Math.min(1, columns - 1), y },
+        { x: 0, y }
+    ];
+    direction = { x: 1, y: 0 };
+    nextDirection = { ...direction };
+}
+
+/* PROJECTS */
+function selectRandomProject() {
+    let choices = projectData.filter(
+        data => data.id !== lastSpawnedProjectId
+    );
+
+    if (!choices.length) choices = projectData;
+
+    const selected = choices[randomInt(choices.length)];
+    lastSpawnedProjectId = selected.id;
+
+    return selected;
+}
+
+function spawnProject(projectInfo = null) {
+    const position = getFreePosition();
+    if (!position) return false;
+
+    const data = projectInfo || selectRandomProject();
+
+    projects.push({
+        ...position,
+        id: data.id,
+        name: data.name,
+        url: data.url,
+        images: data.images
+    });
+
+    return true;
+}
+
+function createProjects() {
+    projects = [];
+    lastSpawnedProjectId = null;
+
+    const shuffled = [...projectData];
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = randomInt(i + 1);
+        [shuffled[i], shuffled[j]] =
+            [shuffled[j], shuffled[i]];
+    }
+
+    shuffled.slice(0, TOTAL_PROJECTS).forEach(
+        data => spawnProject(data)
+    );
+}
+
+/* PREVIEW PLACEMENT */
+let activePreviewKey = null;
+let activeHoveredCell = null;
+let pointerX = null;
+let pointerY = null;
+
+function rectanglesOverlap(a, b) {
+    return (
+        a.x < b.x + b.w &&
+        a.x + a.w > b.x &&
+        a.y < b.y + b.h &&
+        a.y + a.h > b.y
+    );
+}
+
+function panelsTooClose(a, b, gap = PREVIEW_GAP) {
+    return (
+        a.x < b.x + b.w + gap &&
+        a.x + a.w + gap > b.x &&
+        a.y < b.y + b.h + gap &&
+        a.y + a.h + gap > b.y
+    );
+}
+
+/*
+    RESPONSIVE POSITION SEARCH
+
+    Phone portrait:
+      Search for 1 panel.
+
+    Tablet portrait and landscape:
+      Search for 3 panels.
+
+    All panels remain 3x2.
+*/
+function findPreviewPositions(source) {
+    const targetCount = getPreviewCount();
+
+    const protectedArea = {
+        x: source.x - SOURCE_GAP,
+        y: source.y - SOURCE_GAP,
+        w: 1 + SOURCE_GAP * 2,
+        h: 1 + SOURCE_GAP * 2
+    };
+
+    const candidates = [];
+
+    for (let y = 0; y <= rows - PREVIEW_ROWS; y++) {
+        for (let x = 0; x <= columns - PREVIEW_COLS; x++) {
+            const rectangle = {
+                x,
+                y,
+                w: PREVIEW_COLS,
+                h: PREVIEW_ROWS
+            };
+
+            if (rectanglesOverlap(rectangle, protectedArea)) {
+                continue;
+            }
+
+            const dx = Math.max(
+                0,
+                source.x - (x + PREVIEW_COLS),
+                x - (source.x + 1)
+            );
+
+            const dy = Math.max(
+                0,
+                source.y - (y + PREVIEW_ROWS),
+                y - (source.y + 1)
+            );
+
+            const distance = dx * dx + dy * dy;
+
+            candidates.push({
+                ...rectangle,
+                score: distance + Math.random() * .25
+            });
+        }
+    }
+
+    candidates.sort((a, b) => a.score - b.score);
+
+    /* PHONE: ONLY IMAGE 01 */
+    if (targetCount === 1) {
+        return candidates.length ? [candidates[0]] : [];
+    }
+
+    /*
+        TABLET / LANDSCAPE:
+        Find three panels with one-cell gaps.
+    */
+    const pool = candidates.slice(0, 100);
+    let bestSet = [];
+    let bestScore = Infinity;
+
+    for (let i = 0; i < pool.length; i++) {
+        const a = pool[i];
+
+        for (let j = i + 1; j < pool.length; j++) {
+            const b = pool[j];
+
+            if (panelsTooClose(a, b)) continue;
+
+            for (let k = j + 1; k < pool.length; k++) {
+                const c = pool[k];
+
+                if (
+                    panelsTooClose(a, c) ||
+                    panelsTooClose(b, c)
+                ) {
+                    continue;
+                }
+
+                const score =
+                    a.score + b.score + c.score;
+
+                if (score < bestScore) {
+                    bestScore = score;
+                    bestSet = [a, b, c];
+                }
+            }
+        }
+    }
+
+    if (bestSet.length === 3) return bestSet;
+
+    /*
+        If the grid cannot accommodate three,
+        show as many as possible without
+        violating the spacing rules.
+    */
+    const selected = [];
+
+    for (const candidate of candidates) {
+        if (
+            selected.every(
+                item => !panelsTooClose(item, candidate)
+            )
+        ) {
+            selected.push(candidate);
+        }
+
+        if (selected.length === targetCount) break;
+    }
+
+    return selected;
+}
+
+/* SHOW PREVIEWS */
+function showProjectPreviews(project) {
+    const key =
+        project.id + ":" +
+        project.x + ":" +
+        project.y + ":" +
+        getPreviewCount();
+
+    if (activePreviewKey === key) return;
+
+    activePreviewKey = key;
+    previewLayer.replaceChildren();
+
+    const positions = findPreviewPositions(project);
+
+    positions.forEach((position, index) => {
+        const panel = document.createElement("div");
+        panel.className = "preview-panel";
+
+        panel.style.left =
+            position.x * cellWidth + "px";
+        panel.style.top =
+            position.y * cellHeight + "px";
+
+        const imagePath = project.images?.[index];
+
+        if (imagePath) {
+            const image = document.createElement("img");
+            image.className = "preview-image";
+            image.src = imagePath;
+            image.alt =
+                "Proje " + project.id +
+                " görsel " + (index + 1);
+            panel.appendChild(image);
+        }
+
+        const label = document.createElement("span");
+        label.className = "preview-label";
+        label.textContent =
+            "görsel" +
+            String(index + 1).padStart(2, "0");
+
+        panel.appendChild(label);
+        previewLayer.appendChild(panel);
+    });
+}
+
+function hideProjectPreviews() {
+    activePreviewKey = null;
+    previewLayer.replaceChildren();
+}
+
+/* HOVER */
+function clearProjectHover() {
+    activeHoveredCell = null;
+    grid.classList.remove("project-hover-active");
+
+    grid.querySelectorAll(".project.is-hovered").forEach(
+        element => element.classList.remove("is-hovered")
+    );
+
+    hideProjectPreviews();
+}
+
+function activateProjectHover(project, element) {
+    const key =
+        project.x + "," +
+        project.y + ":" +
+        project.id;
+
+    if (activeHoveredCell === key) return;
+
+    activeHoveredCell = key;
+
+    grid.querySelectorAll(".project.is-hovered").forEach(
+        item => item.classList.remove("is-hovered")
+    );
+
+    element.classList.add("is-hovered");
+    grid.classList.add("project-hover-active");
+
+    showProjectPreviews(project);
+}
+
+function refreshProjectHover() {
+    if (pointerX === null || pointerY === null) {
+        clearProjectHover();
+        return;
+    }
+
+    const rect = grid.getBoundingClientRect();
+    const localX = pointerX - rect.left;
+    const localY = pointerY - rect.top;
+
+    if (
+        localX < 0 ||
+        localY < 0 ||
+        localX >= rect.width ||
+        localY >= rect.height
+    ) {
+        clearProjectHover();
+        return;
+    }
+
+    const x = Math.floor(localX / cellWidth);
+    const y = Math.floor(localY / cellHeight);
+
+    const project = projects.find(
+        item => item.x === x && item.y === y
+    );
+
+    if (!project) {
+        clearProjectHover();
+        return;
+    }
+
+    const element = [
+        ...grid.querySelectorAll(".project")
+    ].find(
+        item =>
+            Number(item.dataset.x) === project.x &&
+            Number(item.dataset.y) === project.y
+    );
+
+    if (element) {
+        activateProjectHover(project, element);
+    }
+}
+
+grid.addEventListener("pointermove", event => {
+    if (event.pointerType === "touch") return;
+
+    pointerX = event.clientX;
+    pointerY = event.clientY;
+    refreshProjectHover();
+});
+
+grid.addEventListener("pointerleave", () => {
+    pointerX = null;
+    pointerY = null;
+    clearProjectHover();
+});
+
+/*
+    MOBILE / TABLET TOUCH
+
+    Tap a project to open its previews.
+    Tap an empty cell to close previews.
+*/
+grid.addEventListener("click", event => {
+    if (event.target.closest(".snake-start")) return;
+    if (event.target.closest("#game-overlay")) return;
+
+    if (
+        window.matchMedia("(hover: hover) and (pointer: fine)")
+            .matches
+    ) {
+        return;
+    }
+
+    const rect = grid.getBoundingClientRect();
+    const x = Math.floor(
+        (event.clientX - rect.left) / cellWidth
+    );
+    const y = Math.floor(
+        (event.clientY - rect.top) / cellHeight
+    );
+
+    const project = projects.find(
+        item => item.x === x && item.y === y
+    );
+
+    if (!project) {
+        clearProjectHover();
+        return;
+    }
+
+    const element = [
+        ...grid.querySelectorAll(".project")
+    ].find(
+        item =>
+            Number(item.dataset.x) === x &&
+            Number(item.dataset.y) === y
+    );
+
+    if (element) {
+        activateProjectHover(project, element);
+    }
+});
+
+/* RENDER PROJECTS */
+function renderProjects() {
+    grid.querySelectorAll(".project").forEach(
+        element => element.remove()
+    );
+
+    projects.forEach(project => {
+        const element = document.createElement("div");
+        element.className = "project";
+
+        element.dataset.x = project.x;
+        element.dataset.y = project.y;
+
+        element.style.left =
+            project.x * cellWidth + "px";
+        element.style.top =
+            project.y * cellHeight + "px";
+        element.style.width =
+            cellWidth + "px";
+        element.style.height =
+            cellHeight + "px";
+
+        const numberLink = document.createElement("a");
+        numberLink.className = "project-number";
+        numberLink.textContent = project.id;
+        numberLink.href = project.url;
+
+        numberLink.addEventListener("click", event => {
+            event.stopPropagation();
+        });
+
+        // The entire project tile opens its corresponding project page.
+        element.style.cursor = "pointer";
+        element.addEventListener("click", event => {
+            if (event.target.closest("a[href]")) return;
+            event.stopPropagation();
+            window.location.href = project.url;
+        });
+
+        element.appendChild(numberLink);
+
+        const nameElement = document.createElement("div");
+        nameElement.className = "project-name";
+        nameElement.textContent = project.name;
+
+        element.appendChild(nameElement);
+        grid.appendChild(element);
+    });
+}
+
+/* RENDER SNAKE */
+function renderSnake() {
+    grid.querySelectorAll(
+        ".snake-segment, .snake-head"
+    ).forEach(element => element.remove());
+
+    snake.forEach((segment, index) => {
+        const element = document.createElement("div");
+
+        element.className =
+            index === 0 ? "snake-head" : "snake-segment";
+
+        element.style.left =
+            segment.x * cellWidth + "px";
+        element.style.top =
+            segment.y * cellHeight + "px";
+        element.style.width =
+            cellWidth + "px";
+        element.style.height =
+            cellHeight + "px";
+
+        if (index === 0 && !gameStarted) {
+            const button = document.createElement("button");
+            button.className = "snake-start";
+            button.textContent = "START";
+            button.addEventListener("click", startGame);
+            element.appendChild(button);
+        }
+
+        grid.appendChild(element);
+    });
+}
+
+function render() {
+    renderSnake();
+    renderProjects();
+
+    /*
+        Rebuild hover state only for mouse.
+        Touch selection stays visible.
+    */
+    if (pointerX !== null && pointerY !== null) {
+        activeHoveredCell = null;
+        refreshProjectHover();
+    } else if (activeHoveredCell !== null) {
+        const selected = projects.find(
+            project =>
+                project.x + "," +
+                project.y + ":" +
+                project.id === activeHoveredCell
+        );
+
+        if (selected) {
+            const element = [
+                ...grid.querySelectorAll(".project")
+            ].find(
+                item =>
+                    Number(item.dataset.x) === selected.x &&
+                    Number(item.dataset.y) === selected.y
+            );
+
+            if (element) {
+                element.classList.add("is-hovered");
+            }
+        } else {
+            clearProjectHover();
+        }
+    }
+}
+
+/* GAME */
+function getGameSpeed() {
+    return window.innerWidth <= 768 ? 240 : 170;
+}
+
+function startGame() {
+    if (gameStarted || gameRunning) return;
+
+    gameStarted = true;
+
+    grid.querySelectorAll(".snake-start").forEach(
+        button => button.remove()
+    );
+
+    startDelay = setTimeout(() => {
+        gameRunning = true;
+        gameTimer = setInterval(moveSnake, getGameSpeed());
+    }, 1000);
+}
+
+function changeDirection(x, y) {
+    if (
+        x === -direction.x &&
+        y === -direction.y
+    ) {
+        return;
+    }
+
+    nextDirection = { x, y };
+}
+
+function moveSnake() {
+    if (!gameRunning) return;
+
+    direction = { ...nextDirection };
+
+    const head = {
+        x: snake[0].x + direction.x,
+        y: snake[0].y + direction.y
+    };
+
+    /* PORTAL EDGES */
+    if (head.x < 0) head.x = columns - 1;
+    if (head.x >= columns) head.x = 0;
+    if (head.y < 0) head.y = rows - 1;
+    if (head.y >= rows) head.y = 0;
+
+    const eatenIndex = projects.findIndex(
+        project =>
+            project.x === head.x &&
+            project.y === head.y
+    );
+
+    const eating = eatenIndex !== -1;
+    const bodyToCheck = eating
+        ? snake
+        : snake.slice(0, -1);
+
+    const hitSelf = bodyToCheck.some(
+        segment =>
+            segment.x === head.x &&
+            segment.y === head.y
+    );
+
+    if (hitSelf) {
+        endGame(false);
+        return;
+    }
+
+    snake.unshift(head);
+
+    if (eating) {
+        projects.splice(eatenIndex, 1);
+        eatenCount++;
+
+        if (eatenCount >= PROJECTS_TO_REPLACE) {
+            spawnProject();
+        }
+    } else {
+        snake.pop();
+    }
+
+    render();
+
+    if (snake.length >= columns * rows) {
+        endGame(true);
+    }
+}
+
+function endGame(won) {
+    gameRunning = false;
+    gameStarted = false;
+
+    clearInterval(gameTimer);
+    clearTimeout(startDelay);
+
+    gameResult.textContent =
+        won ? "YOU WIN!" : "GAME OVER";
+
+    projectCount.textContent =
+        "Projects eaten: " + eatenCount;
+
+    overlay.classList.add("visible");
+    clearProjectHover();
+}
+
+function setupGame() {
+    clearInterval(gameTimer);
+    clearTimeout(startDelay);
+
+    gameRunning = false;
+    gameStarted = false;
+    eatenCount = 0;
+
+    overlay.classList.remove("visible");
+    clearProjectHover();
+
+    createRandomSnake();
+    createProjects();
+    render();
+}
+
+restartButton.addEventListener("click", setupGame);
+
+/* KEYBOARD */
+document.addEventListener("keydown", event => {
+    const key = event.key.toLowerCase();
+
+    const controls = [
+        "arrowup", "arrowdown",
+        "arrowleft", "arrowright",
+        "w", "a", "s", "d"
+    ];
+
+    if (controls.includes(key)) {
+        event.preventDefault();
+    }
+
+    if (key === "arrowup" || key === "w") {
+        changeDirection(0, -1);
+    }
+    if (key === "arrowdown" || key === "s") {
+        changeDirection(0, 1);
+    }
+    if (key === "arrowleft" || key === "a") {
+        changeDirection(-1, 0);
+    }
+    if (key === "arrowright" || key === "d") {
+        changeDirection(1, 0);
+    }
+});
+
+/* TOUCH SWIPE */
+let touchStartX = 0;
+let touchStartY = 0;
+
+grid.addEventListener("touchstart", event => {
+    const touch = event.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+}, { passive: true });
+
+grid.addEventListener("touchend", event => {
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) {
+        return;
+    }
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        changeDirection(dx > 0 ? 1 : -1, 0);
+    } else {
+        changeDirection(0, dy > 0 ? 1 : -1);
+    }
+}, { passive: true });
+
+/* RESIZE */
+let resizeTimeout;
+
+window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(calculateGrid, 100);
+});
+
+window.addEventListener("orientationchange", () => {
+    setTimeout(calculateGrid, 150);
+});
+
+/* INITIALIZE */
+calculateGrid();
+</script>
+</body>
+</html>

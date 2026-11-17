@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S STUDIO — Project 01</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --header-height:24px;
+  --cell-width:50px;
+  --cell-height:50px;
+  --grid-viewport-height:600px;
+  --content-height:1200px;
+  --second-section-height:600px;
+  --cover-columns:7;
+  --cover-rows:5;
+  --grid-line-color:#b0b0b0;
+}
+html,body{
+  width:100%;height:100%;overflow:hidden;
+  background:white;font-family:Arial,Helvetica,sans-serif;
+}
+
+/* HEADER */
+#topbar{
+  position:relative;z-index:30;display:flex;
+  align-items:center;justify-content:space-between;
+  width:100%;height:var(--header-height);min-height:20px;
+  padding:0 12px;background:black;
+}
+#brand{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:100%;padding:0 7px;color:white;font-size:12px;
+  font-weight:600;letter-spacing:.2px;text-decoration:none;
+  white-space:nowrap;
+}
+#brand:hover{
+  color:red;background:white;
+  box-shadow:-12px 0 white,12px 0 white;
+}
+#nav-links{
+  position:relative;display:flex;align-items:center;height:100%;
+}
+#menu-button{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:100%;padding:0 7px;border:0;background:transparent;
+  cursor:pointer;
+}
+#menu-button:hover,#menu-button[aria-expanded="true"]{
+  background:white;box-shadow:-12px 0 white,12px 0 white;
+}
+.menu-icon{
+  display:flex;flex-direction:column;justify-content:space-between;
+  width:15px;height:12px;
+}
+.menu-icon span{
+  display:block;width:100%;height:1px;background:white;
+}
+#menu-button:hover .menu-icon span,
+#menu-button[aria-expanded="true"] .menu-icon span{
+  background:red;
+}
+#dropdown-menu{
+  position:absolute;top:100%;right:-12px;z-index:35;
+  display:none;flex-direction:column;
+  width:calc(2 * var(--cell-width));
+  height:calc(2 * var(--cell-height));
+  padding-top:10px;background:black;
+}
+#dropdown-menu.open{display:flex}
+.dropdown-link{
+  display:flex;align-items:center;justify-content:flex-end;
+  width:100%;min-height:30px;padding:6px 19px;
+  color:white;background:black;font-size:12px;
+  text-decoration:none;white-space:nowrap;
+}
+.dropdown-link:hover,.dropdown-link:focus-visible{
+  color:red;background:white;outline:none;
+}
+
+/* GRID */
+#grid{
+  position:relative;width:100%;height:var(--grid-viewport-height);
+  overflow-x:hidden;overflow-y:auto;overscroll-behavior-x:none;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  background:white;
+}
+#grid::-webkit-scrollbar{display:none}
+#project-content{
+  position:relative;width:100%;
+  height:var(--content-height);min-height:var(--content-height);
+  background-color:white;
+  background-image:
+    linear-gradient(to right,var(--grid-line-color) 1px,transparent 1px),
+    linear-gradient(to bottom,var(--grid-line-color) 1px,transparent 1px);
+  background-size:
+    var(--cell-width) var(--cell-height),
+    var(--cell-width) var(--cell-height);
+  background-position:0 0;
+}
+
+/* FIRST SCREEN */
+#project-01-layout{
+  position:relative;width:100%;height:var(--grid-viewport-height);
+}
+#project-01-black-area{
+  position:absolute;top:var(--cell-height);left:var(--cell-width);
+  width:calc(var(--cover-columns) * var(--cell-width));
+  height:calc(var(--cover-rows) * var(--cell-height));
+  background:black;
+}
+
+/* NEW: 1 × 1 PROJECT NUMBER */
+#project-number-square{
+  position:absolute;
+  top:var(--cell-height);
+  right:var(--cell-width);
+  width:var(--cell-width);
+  height:var(--cell-height);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:black;
+  color:white;
+  font-size:clamp(12px,1.5vw,20px);
+  font-weight:600;
+  line-height:1;
+  z-index:2;
+}
+
+/* PROJECT INFORMATION */
+#project-01-information{
+  position:absolute;display:flex;flex-direction:column;
+  align-items:flex-end;justify-content:flex-end;
+  right:var(--cell-width);
+  top:calc(6 * var(--cell-height));
+  bottom:auto;
+  transform:translateY(-100%);
+  max-width:calc(100% - 2 * var(--cell-width));
+  color:black;text-align:right;
+}
+#project-01-location{
+  font-size:clamp(9px,1.1vw,12px);
+  font-weight:400;line-height:1.25;white-space:nowrap;
+}
+#project-01-name{
+  font-size:clamp(11px,1.6vw,17px);
+  font-weight:600;line-height:1.3;white-space:nowrap;
+}
+
+/* SECOND SECTION */
+#project-01-second-screen{
+  position:relative;width:100%;height:var(--second-section-height);
+}
+#diagram-layer,#visual-layer{position:absolute;inset:0}
+.placement-diagram{
+  position:absolute;
+  width:calc(2 * var(--cell-width));
+  height:calc(2 * var(--cell-height));
+  background:black;color:white;
+}
+.project-visual{
+  position:absolute;
+  width:calc(5 * var(--cell-width));
+  height:calc(2 * var(--cell-height));
+  background:black;color:white;overflow:hidden;
+}
+.diagram-label,.visual-label{
+  position:absolute;top:8px;left:8px;color:white;
+  font-size:clamp(10px,.9vw,13px);
+  font-weight:400;line-height:1.2;
+  white-space:nowrap;pointer-events:none;
+}
+
+/* PROJECT NAVIGATION */
+.nav-button{
+  position:fixed;top:50%;z-index:40;
+  display:flex;align-items:center;justify-content:center;
+  width:44px;height:64px;transform:translateY(-50%);
+  border:0;background:transparent;cursor:pointer;text-decoration:none;
+}
+#previous-project{left:0}
+#next-project{right:0}
+.triangle{
+  display:block;width:0;height:0;border-style:solid;
+  transition:border-color .15s ease;
+}
+#previous-project .triangle{
+  border-width:10px 14px 10px 0;
+  border-color:transparent black transparent transparent;
+}
+#next-project .triangle{
+  border-width:10px 0 10px 14px;
+  border-color:transparent transparent transparent black;
+}
+#previous-project:hover .triangle,
+#previous-project:focus-visible .triangle{border-right-color:red}
+#next-project:hover .triangle,
+#next-project:focus-visible .triangle{border-left-color:red}
+
+/* VERTICAL NAVIGATION */
+.vertical-nav-button{
+  position:fixed;left:50%;z-index:45;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  width:64px;height:44px;transform:translateX(-50%);
+  border:0;background:transparent;cursor:pointer;
+}
+#scroll-up-button{
+  top:var(--header-height);
+  visibility:hidden;opacity:0;pointer-events:none;
+}
+#scroll-up-button.is-visible{
+  visibility:visible;opacity:1;pointer-events:auto;
+}
+.up-triangle{
+  display:block;width:0;height:0;border-style:solid;
+  border-width:0 10px 14px 10px;
+  border-color:transparent transparent black transparent;
+}
+#scroll-up-button:hover .up-triangle,
+#scroll-up-button:focus-visible .up-triangle{border-bottom-color:red}
+#scroll-button{bottom:0}
+.down-triangle{
+  display:block;width:0;height:0;border-style:solid;
+  border-width:14px 10px 0 10px;
+  border-color:black transparent transparent transparent;
+}
+#scroll-button:hover .down-triangle,
+#scroll-button:focus-visible .down-triangle{border-top-color:red}
+.double-up-icon{
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;
+}
+.double-up-icon .up-triangle{border-width:0 9px 12px 9px}
+#scroll-button.is-at-bottom .down-triangle{display:none}
+#scroll-button.is-at-bottom .double-up-icon{display:flex}
+#scroll-button.is-at-bottom:hover .double-up-icon .up-triangle,
+#scroll-button.is-at-bottom:focus-visible .double-up-icon .up-triangle{
+  border-bottom-color:red;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+  #topbar{padding:0 8px}
+  #brand{padding:0 5px;font-size:11px}
+  #menu-button{padding:0 5px}
+  #brand:hover{box-shadow:-8px 0 white,8px 0 white}
+  #menu-button:hover,#menu-button[aria-expanded="true"]{
+    box-shadow:-8px 0 white,8px 0 white;
+  }
+  #dropdown-menu{right:-8px;padding-top:5px}
+  .dropdown-link{min-height:27px;padding:5px 13px;font-size:11px}
+  .nav-button{width:32px;height:48px}
+  #previous-project .triangle{border-width:8px 11px 8px 0}
+  #next-project .triangle{border-width:8px 0 8px 11px}
+  #project-01-location{font-size:9px}
+  #project-01-name{font-size:11px}
+  #project-number-square{font-size:14px}
+  .vertical-nav-button{width:48px;height:38px}
+  .up-triangle{border-width:0 8px 11px 8px}
+  .down-triangle{border-width:11px 8px 0 8px}
+  .double-up-icon .up-triangle{border-width:0 8px 10px 8px}
+  .diagram-label,.visual-label{top:6px;left:6px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <a href="index.html" id="brand">S STUDIO</a>
+  <nav id="nav-links" aria-label="Ana menü">
+    <button id="menu-button" type="button"
+      aria-label="Menüyü aç" aria-expanded="false"
+      aria-controls="dropdown-menu">
+      <span class="menu-icon">
+        <span></span><span></span><span></span>
+      </span>
+    </button>
+    <div id="dropdown-menu">
+      <a href="about-us.html" class="dropdown-link">about us</a>
+      <a href="work.html" class="dropdown-link">work</a>
+      <a href="contact.html" class="dropdown-link">contact</a>
+    </div>
+  </nav>
+</header>
+
+<main id="grid">
+  <section id="project-content">
+
+    <div id="project-01-layout">
+      <div id="project-01-black-area" aria-hidden="true"></div>
+
+      <!-- NEW PROJECT NUMBER SQUARE -->
+      <div id="project-number-square">01</div>
+
+      <div id="project-01-information">
+        <div id="project-01-location">LOCATION</div>
+        <div id="project-01-name">PROJECT NAME</div>
+      </div>
+    </div>
+
+    <div id="project-01-second-screen">
+      <div id="diagram-layer" aria-label="Yerleşim diyagramları">
+        <div class="placement-diagram"><span class="diagram-label">adım1</span></div>
+        <div class="placement-diagram"><span class="diagram-label">adım2</span></div>
+        <div class="placement-diagram"><span class="diagram-label">adım3</span></div>
+        <div class="placement-diagram"><span class="diagram-label">adım4</span></div>
+        <div class="placement-diagram"><span class="diagram-label">adım5</span></div>
+      </div>
+      <div id="visual-layer" aria-label="Proje görselleri">
+        <div class="project-visual"><span class="visual-label">görsel01</span></div>
+        <div class="project-visual"><span class="visual-label">görsel02</span></div>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<a id="previous-project" class="nav-button" href="project-10.html"
+  aria-label="Önceki proje"><span class="triangle"></span></a>
+<a id="next-project" class="nav-button" href="project-02.html"
+  aria-label="Sonraki proje"><span class="triangle"></span></a>
+
+<button id="scroll-up-button" class="vertical-nav-button"
+  type="button" aria-label="Bir ekran yukarı kaydır"
+  aria-hidden="true" tabindex="-1">
+  <span class="up-triangle"></span>
+</button>
+
+<button id="scroll-button" class="vertical-nav-button"
+  type="button" aria-label="Bir ekran aşağı kaydır">
+  <span class="down-triangle"></span>
+  <span class="double-up-icon" aria-hidden="true">
+    <span class="up-triangle"></span>
+    <span class="up-triangle"></span>
+  </span>
+</button>
+
+<script>
+/* MENU */
+const menuButton=document.getElementById("menu-button");
+const dropdownMenu=document.getElementById("dropdown-menu");
+const navLinks=document.getElementById("nav-links");
+function setMenuOpen(open){
+  dropdownMenu.classList.toggle("open",open);
+  menuButton.setAttribute("aria-expanded",String(open));
+  menuButton.setAttribute("aria-label",open?"Menüyü kapat":"Menüyü aç");
+}
+menuButton.addEventListener("click",event=>{
+  event.stopPropagation();
+  setMenuOpen(!dropdownMenu.classList.contains("open"));
+});
+document.addEventListener("click",event=>{
+  if(!navLinks.contains(event.target))setMenuOpen(false);
+});
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape")setMenuOpen(false);
+});
+
+/* PROJECT NAVIGATION */
+const PROJECT_COUNT=10,DEFAULT_PROJECT=1;
+function getCurrentProjectNumber(){
+  const filename=window.location.pathname.split("/").pop();
+  const match=filename.match(/^project-(\d+)\.html$/i);
+  if(match){
+    const number=parseInt(match[1],10);
+    if(number>=1&&number<=PROJECT_COUNT)return number;
+  }
+  return DEFAULT_PROJECT;
+}
+function projectURL(number){
+  return "project-"+String(number).padStart(2,"0")+".html";
+}
+function setupProjectNavigation(){
+  const current=getCurrentProjectNumber();
+  const previous=current===1?PROJECT_COUNT:current-1;
+  const next=current===PROJECT_COUNT?1:current+1;
+  document.getElementById("previous-project").href=projectURL(previous);
+  document.getElementById("next-project").href=projectURL(next);
+  document.getElementById("project-number-square").textContent=
+    String(current).padStart(2,"0");
+  document.title="S STUDIO — Project "+String(current).padStart(2,"0");
+}
+
+/* GRID */
+let columns=1,rows=1,cellWidth=50,cellHeight=50;
+const diagrams=Array.from(document.querySelectorAll(".placement-diagram"));
+const visuals=Array.from(document.querySelectorAll(".project-visual"));
+
+function calculateCoverLayout(){
+  const landscape=window.innerWidth>=window.innerHeight;
+  const root=document.documentElement.style;
+  root.setProperty("--cover-columns",landscape?7:4);
+  root.setProperty("--cover-rows",landscape?5:3);
+  const info=document.getElementById("project-01-information");
+  if(landscape){
+    info.style.top="calc(6 * var(--cell-height))";
+    info.style.bottom="auto";
+    info.style.transform="translateY(-100%)";
+  }else{
+    info.style.top="auto";
+    info.style.bottom="var(--cell-height)";
+    info.style.transform="none";
+  }
+}
+
+function calculateDiagramLayout(){
+  const maxPerRow=Math.max(1,Math.floor((columns-1)/3));
+  const diagramsPerRow=Math.min(diagrams.length,maxPerRow);
+  diagrams.forEach((diagram,index)=>{
+    const rowIndex=Math.floor(index/diagramsPerRow);
+    const columnIndex=index%diagramsPerRow;
+    const gridColumn=1+columnIndex*3;
+    const gridRow=1+rowIndex*3;
+    diagram.style.left=(gridColumn*cellWidth)+"px";
+    diagram.style.top=(gridRow*cellHeight)+"px";
+  });
+  const diagramRowCount=Math.ceil(diagrams.length/diagramsPerRow);
+  return 1+(diagramRowCount-1)*3+2+1;
+}
+
+function calculateVisualLayout(startRow){
+  const VISUAL_WIDTH=5,VISUAL_HEIGHT=2,VERTICAL_GAP=1,SIDE_MARGIN=1;
+  const usableColumns=columns-2*SIDE_MARGIN;
+  const visualsPerRow=usableColumns>=VISUAL_WIDTH*visuals.length?visuals.length:1;
+  const visualRowCount=Math.ceil(visuals.length/visualsPerRow);
+
+  visuals.forEach((visual,index)=>{
+    const rowIndex=Math.floor(index/visualsPerRow);
+    const columnIndex=index%visualsPerRow;
+    const gridColumn=visualsPerRow===2
+      ?(columnIndex===0?SIDE_MARGIN:columns-SIDE_MARGIN-VISUAL_WIDTH)
+      :SIDE_MARGIN;
+    const gridRow=startRow+rowIndex*(VISUAL_HEIGHT+VERTICAL_GAP);
+    visual.style.left=(gridColumn*cellWidth)+"px";
+    visual.style.top=(gridRow*cellHeight)+"px";
+  });
+
+  return startRow+visualRowCount*VISUAL_HEIGHT+
+    (visualRowCount-1)*VERTICAL_GAP+1;
+}
+
+/* SCROLL */
+const grid=document.getElementById("grid");
+const scrollButton=document.getElementById("scroll-button");
+const scrollUpButton=document.getElementById("scroll-up-button");
+const secondSection=document.getElementById("project-01-second-screen");
+
+function getMaxScroll(){return Math.max(0,grid.scrollHeight-grid.clientHeight)}
+function isAtTop(){return grid.scrollTop<=2}
+function isAtBottom(){return getMaxScroll()-grid.scrollTop<=2}
+
+function getSectionStops(){
+  const maxScroll=getMaxScroll();
+  const stops=[0,secondSection.offsetTop];
+  for(let position=secondSection.offsetTop+grid.clientHeight;
+      position<secondSection.offsetTop+secondSection.offsetHeight;
+      position+=grid.clientHeight){
+    stops.push(position);
+  }
+  stops.push(maxScroll);
+  return [...new Set(stops.map(v=>Math.max(0,Math.min(maxScroll,v))))]
+    .sort((a,b)=>a-b);
+}
+
+function updateScrollButtons(){
+  const showTopArrow=!isAtTop()&&getMaxScroll()>2;
+  const atBottom=isAtBottom();
+  scrollUpButton.classList.toggle("is-visible",showTopArrow);
+  scrollUpButton.setAttribute("aria-hidden",String(!showTopArrow));
+  scrollUpButton.tabIndex=showTopArrow?0:-1;
+  scrollButton.classList.toggle("is-at-bottom",atBottom);
+  scrollButton.setAttribute("aria-label",
+    atBottom?"Sayfanın başlangıcına dön":"Bir ekran aşağı kaydır");
+}
+
+scrollButton.addEventListener("click",()=>{
+  if(isAtBottom()){
+    grid.scrollTo({top:0,behavior:"smooth"});
+    return;
+  }
+  const next=getSectionStops().find(stop=>stop>grid.scrollTop+2);
+  grid.scrollTo({top:next===undefined?getMaxScroll():next,behavior:"smooth"});
+});
+scrollUpButton.addEventListener("click",()=>{
+  const previous=getSectionStops().filter(stop=>stop<grid.scrollTop-2).pop();
+  grid.scrollTo({top:previous===undefined?0:previous,behavior:"smooth"});
+});
+grid.addEventListener("scroll",updateScrollButtons,{passive:true});
+
+/* RESPONSIVE GRID */
+function calculateGrid(){
+  const width=window.innerWidth;
+  const viewportHeight=window.innerHeight;
+  const landscape=width>=viewportHeight;
+  const minDivisor=landscape?4:2.5;
+  const maxDivisor=landscape?8:4;
+  const preferredDivisor=landscape?8:2.8;
+  let bestScore=Infinity,best=null;
+
+  for(let divisor=minDivisor;divisor<=maxDivisor+0.001;divisor+=0.1){
+    let availableHeight=viewportHeight;
+    let testColumns=1,testRows=1,testCellWidth=1,testCellHeight=1,headerHeight=0;
+    for(let iteration=0;iteration<4;iteration++){
+      const baseSize=Math.min(width,availableHeight);
+      const targetSize=baseSize/divisor;
+      testColumns=Math.max(1,Math.round(width/targetSize));
+      testRows=Math.max(1,Math.round(availableHeight/targetSize));
+      testCellWidth=width/testColumns;
+      testCellHeight=availableHeight/testRows;
+      headerHeight=testCellHeight/4;
+      availableHeight=viewportHeight-headerHeight;
+    }
+    const ratioError=Math.abs(Math.log(testCellWidth/testCellHeight));
+    const sizePenalty=Math.abs(divisor-preferredDivisor)*0.0005;
+    const score=ratioError+sizePenalty;
+    if(score<bestScore){
+      bestScore=score;
+      best={columns:testColumns,rows:testRows,headerHeight};
+    }
+  }
+
+  columns=best.columns;rows=best.rows;
+  cellWidth=width/columns;
+  cellHeight=(viewportHeight-best.headerHeight)/rows;
+  const gridViewportHeight=viewportHeight-best.headerHeight;
+  const root=document.documentElement.style;
+  root.setProperty("--header-height",best.headerHeight+"px");
+  root.setProperty("--cell-width",cellWidth+"px");
+  root.setProperty("--cell-height",cellHeight+"px");
+  root.setProperty("--grid-viewport-height",gridViewportHeight+"px");
+
+  calculateCoverLayout();
+  const visualStartRow=calculateDiagramLayout();
+  const requiredRows=calculateVisualLayout(visualStartRow);
+
+  const additionalScreens=requiredRows<=rows?1:2;
+  const secondSectionHeight=additionalScreens*gridViewportHeight;
+  root.setProperty("--second-section-height",secondSectionHeight+"px");
+  root.setProperty("--content-height",
+    (gridViewportHeight+secondSectionHeight)+"px");
+
+  requestAnimationFrame(updateScrollButtons);
+}
+
+let resizeTimeout;
+window.addEventListener("resize",()=>{
+  clearTimeout(resizeTimeout);
+  resizeTimeout=setTimeout(calculateGrid,100);
+});
+window.addEventListener("orientationchange",()=>{
+  setTimeout(calculateGrid,150);
+});
+
+setupProjectNavigation();
+calculateGrid();
+updateScrollButtons();
+</script>
+</body>
+</html>
